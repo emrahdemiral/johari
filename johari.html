@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Johari Özellik Seçimi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h2 {
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .trait {
+      background-color: #fff;
+      border: 2px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .trait.selected {
+      border-color: #2a9d8f;
+      background-color: #e0f7f4;
+    }
+    #submitBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #result {
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Johari Penceresi: Özellik Seçimi</h2>
+  <p>Lütfen seni en iyi tanımlayan 5-6 özelliği seç.</p>
+  <div class="grid" id="traitsGrid"></div>
+  <button id="submitBtn">Gönder</button>
+  <div id="result"></div>
+
+  <script>
+    const traits = [
+      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
+      "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
+      "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
+      "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
+      "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
+      "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
+      "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
+      "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
+      "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
+      "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
+      "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
+      "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
+    ];
+
+    const grid = document.getElementById("traitsGrid");
+    const result = document.getElementById("result");
+
+    traits.forEach(trait => {
+      const div = document.createElement("div");
+      div.className = "trait";
+      div.innerText = trait;
+      div.onclick = () => {
+        div.classList.toggle("selected");
+        const selected = document.querySelectorAll(".trait.selected");
+        if (selected.length > 6) {
+          div.classList.remove("selected");
+          alert("En fazla 6 özellik seçebilirsiniz.");
+        }
+      };
+      grid.appendChild(div);
+    });
+
+    document.getElementById("submitBtn").onclick = () => {
+      const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
+      if (selected.length < 5) {
+        alert("Lütfen en az 5 özellik seçin.");
+        return;
+      }
+      result.innerHTML = `<h3>Seçtiğin Özellikler:</h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
+    };
+  </script>
+</body>
+</html>
