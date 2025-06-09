@@ -65,20 +65,18 @@
   <div id="result"></div>
 
   <script>
-    const traits = [
-      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
-      "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
-      "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
-      "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
-      "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
-      "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
-      "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
-      "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
-      "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
-      "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
-      "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
-      "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
-    ];
+    const traits = ["Güvenilir","Destekleyici","Planlı","Adil","Sonuç odaklı","Sistemli","Mutlu",
+    "İnisiyatif alan","Analitik","Sakin","Vizyoner","Proaktif","İlham verici","Mantıklı",
+    "Empatik","Pratik","İyimser","Cesur","Çatışma çözen","Yardım eden","İdealist",
+    "Kararlı","Organize","Saygılı","Yapıcı","Yol gösterici","Çok yönlü","Sevecen",
+    "Takım oyuncusu","Disiplinli","Çözüm odaklı","Gelişime açık","İşbirliğine açık","Öğrenmeye açık","Maharetli",
+    "Yenilikçi","Net mesaj veren","Dinlemeyi bilen","İfade gücü yüksek","Kendini tanıyan","Eleştirel bakan","Düşünceli",
+    "Sorumluluk sahibi","Motive edici","Yardımsever","İlişki kurabilen","Meraklı","Tutkulu","İlgili",
+    "İkna edici","Uyumlu","Hızlı öğrenen","Kapsayıcı","Nazik","Özenli","Enerjik",
+    "Sabırlı","Esnek","Özgüvenli","Müşteri odaklı","Dengeli","Adaptif","Dışa dönük",
+    "Sabırsız","İnatçı","İçe dönük","Kötümser","Eleştiriye kapalı","Kontrolcü","Asabi",
+    "Kararsız","Kırılgan","Detaycı","Sert üsluplu","Çabuk demotive olan","Kibirli","Kontrol delisi",
+    "Aceleci","Soğuk","Gergin","Pasif","Dinlemeyen","Aşırı eleştirel","Katı"];
 
     const grid = document.getElementById("traitsGrid");
     const result = document.getElementById("result");
