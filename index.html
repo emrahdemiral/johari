@@ -53,19 +53,17 @@
   <div class="selector-group">
     <label for="nameInput">Kimi değerlendiriyorsunuz?</label><br>
     <input type="text" id="nameInput" placeholder="İsim yazın" style="padding: 8px; margin-top: 8px; width: 220px;"><br><br>
-
     <label><input type="radio" name="mode" value="self" checked> Kendim için</label>
     <label style="margin-left: 20px;"><input type="radio" name="mode" value="other"> Başkası için</label>
   </div>
-
   <h2>Johari Penceresi: Özellik Seçimi</h2>
   <p>Lütfen değerlendirdiğiniz kişiyi en iyi tanımlayan 5-6 özelliği seçin.</p>
   <div class="grid" id="traitsGrid"></div>
   <button id="submitBtn">Gönder</button>
   <div id="result"></div>
 
-  <script>
-    const traits = ["Güvenilir","Destekleyici","Planlı","Adil","Sonuç odaklı","Sistemli","Mutlu",
+<script>
+  const traits = ["Güvenilir","Destekleyici","Planlı","Adil","Sonuç odaklı","Sistemli","Mutlu",
     "İnisiyatif alan","Analitik","Sakin","Vizyoner","Proaktif","İlham verici","Mantıklı",
     "Empatik","Pratik","İyimser","Cesur","Çatışma çözen","Yardım eden","İdealist",
     "Kararlı","Organize","Saygılı","Yapıcı","Yol gösterici","Çok yönlü","Sevecen",
@@ -78,42 +76,65 @@
     "Kararsız","Kırılgan","Detaycı","Sert üsluplu","Çabuk demotive olan","Kibirli","Kontrol delisi",
     "Aceleci","Soğuk","Gergin","Pasif","Dinlemeyen","Aşırı eleştirel","Katı"];
 
-    const grid = document.getElementById("traitsGrid");
-    const result = document.getElementById("result");
+  const grid = document.getElementById("traitsGrid");
+  const result = document.getElementById("result");
 
-    traits.forEach(trait => {
-      const div = document.createElement("div");
-      div.className = "trait";
-      div.innerText = trait;
-      div.onclick = () => {
-        div.classList.toggle("selected");
-        const selected = document.querySelectorAll(".trait.selected");
-        if (selected.length > 6) {
-          div.classList.remove("selected");
-          alert("En fazla 6 özellik seçebilirsiniz.");
-        }
-      };
-      grid.appendChild(div);
-    });
-
-    document.getElementById("submitBtn").onclick = () => {
-      const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
-      const name = document.getElementById("nameInput").value.trim();
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-
-      if (!name) {
-        alert("Lütfen bir isim girin.");
-        return;
+  traits.forEach(trait => {
+    const div = document.createElement("div");
+    div.className = "trait";
+    div.innerText = trait;
+    div.onclick = () => {
+      div.classList.toggle("selected");
+      const selected = document.querySelectorAll(".trait.selected");
+      if (selected.length > 6) {
+        div.classList.remove("selected");
+        alert("En fazla 6 özellik seçebilirsiniz.");
       }
-      if (selected.length < 5) {
-        alert("Lütfen en az 5 özellik seçin.");
-        return;
-      }
-
-      let headerText = mode === "self" ? `${name} (Kendi değerlendirmesi)` : `${name} için seçilen özellikler`;
-
-      result.innerHTML = `<h3><strong>${headerText}</strong></h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
     };
-  </script>
+    grid.appendChild(div);
+  });
+
+  document.getElementById("submitBtn").onclick = () => {
+    const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
+    const name = document.getElementById("nameInput").value.trim();
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+
+    if (!name) {
+      alert("Lütfen bir isim girin.");
+      return;
+    }
+    if (selected.length < 5) {
+      alert("Lütfen en az 5 özellik seçin.");
+      return;
+    }
+
+    let headerText = mode === "self" ? `${name} (Kendi değerlendirmesi)` : `${name} için seçilen özellikler`;
+    result.innerHTML = `<h3><strong>${headerText}</strong></h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
+
+    const now = new Date().toISOString();
+    const data = {
+      data: [{
+        isim: name,
+        mod: mode,
+        ozellikler: selected.join(", "),
+        tarih: now
+      }]
+    };
+
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }).then(res => {
+      if (res.ok) {
+        console.log("Veri başarıyla gönderildi!");
+      } else {
+        alert("Veri gönderilemedi. Lütfen internet bağlantınızı kontrol edin.");
+      }
+    });
+  };
+</script>
 </body>
 </html>
