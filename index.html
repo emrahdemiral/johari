@@ -43,12 +43,19 @@
       padding: 15px;
       border-radius: 8px;
     }
+    .selector-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
-  <div style="text-align:center; margin-bottom: 20px;">
+  <div class="selector-group">
     <label for="nameInput">Kimi değerlendiriyorsunuz?</label><br>
-    <input type="text" id="nameInput" placeholder="İsim yazın" style="padding: 8px; margin-top: 8px; width: 220px;">
+    <input type="text" id="nameInput" placeholder="İsim yazın" style="padding: 8px; margin-top: 8px; width: 220px;"><br><br>
+
+    <label><input type="radio" name="mode" value="self" checked> Kendim için</label>
+    <label style="margin-left: 20px;"><input type="radio" name="mode" value="other"> Başkası için</label>
   </div>
 
   <h2>Johari Penceresi: Özellik Seçimi</h2>
@@ -94,6 +101,7 @@
     document.getElementById("submitBtn").onclick = () => {
       const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
       const name = document.getElementById("nameInput").value.trim();
+      const mode = document.querySelector('input[name="mode"]:checked').value;
 
       if (!name) {
         alert("Lütfen bir isim girin.");
@@ -103,7 +111,10 @@
         alert("Lütfen en az 5 özellik seçin.");
         return;
       }
-      result.innerHTML = `<h3><strong>${name}</strong> için seçilen özellikler:</h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
+
+      let headerText = mode === "self" ? `${name} (Kendi değerlendirmesi)` : `${name} için seçilen özellikler`;
+
+      result.innerHTML = `<h3><strong>${headerText}</strong></h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
     };
   </script>
 </body>
