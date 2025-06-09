@@ -46,8 +46,13 @@
   </style>
 </head>
 <body>
+  <div style="text-align:center; margin-bottom: 20px;">
+    <label for="nameInput">Kimi değerlendiriyorsunuz?</label><br>
+    <input type="text" id="nameInput" placeholder="İsim yazın" style="padding: 8px; margin-top: 8px; width: 220px;">
+  </div>
+
   <h2>Johari Penceresi: Özellik Seçimi</h2>
-  <p>Lütfen seni en iyi tanımlayan 5-6 özelliği seç.</p>
+  <p>Lütfen değerlendirdiğiniz kişiyi en iyi tanımlayan 5-6 özelliği seçin.</p>
   <div class="grid" id="traitsGrid"></div>
   <button id="submitBtn">Gönder</button>
   <div id="result"></div>
@@ -88,11 +93,17 @@
 
     document.getElementById("submitBtn").onclick = () => {
       const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
+      const name = document.getElementById("nameInput").value.trim();
+
+      if (!name) {
+        alert("Lütfen bir isim girin.");
+        return;
+      }
       if (selected.length < 5) {
         alert("Lütfen en az 5 özellik seçin.");
         return;
       }
-      result.innerHTML = `<h3>Seçtiğin Özellikler:</h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
+      result.innerHTML = `<h3><strong>${name}</strong> için seçilen özellikler:</h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
     };
   </script>
 </body>
