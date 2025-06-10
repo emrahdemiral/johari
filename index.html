@@ -51,90 +51,99 @@
 </head>
 <body>
   <div class="selector-group">
-    <label for="nameInput">Kimi değerlendiriyorsunuz?</label><br>
-    <input type="text" id="nameInput" placeholder="İsim yazın" style="padding: 8px; margin-top: 8px; width: 220px;"><br><br>
+    <label for="nameSelect">Kimi değerlendiriyorsunuz?</label><br>
+    <select id="nameSelect" style="padding: 8px; margin-top: 8px; width: 220px;"></select><br><br>
+
     <label><input type="radio" name="mode" value="self" checked> Kendim için</label>
     <label style="margin-left: 20px;"><input type="radio" name="mode" value="other"> Başkası için</label>
   </div>
+
   <h2>Johari Penceresi: Özellik Seçimi</h2>
   <p>Lütfen değerlendirdiğiniz kişiyi en iyi tanımlayan 5-6 özelliği seçin.</p>
   <div class="grid" id="traitsGrid"></div>
   <button id="submitBtn">Gönder</button>
   <div id="result"></div>
 
-<script>
-  const traits = ["Güvenilir","Destekleyici","Planlı","Adil","Sonuç odaklı","Sistemli","Mutlu",
-    "İnisiyatif alan","Analitik","Sakin","Vizyoner","Proaktif","İlham verici","Mantıklı",
-    "Empatik","Pratik","İyimser","Cesur","Çatışma çözen","Yardım eden","İdealist",
-    "Kararlı","Organize","Saygılı","Yapıcı","Yol gösterici","Çok yönlü","Sevecen",
-    "Takım oyuncusu","Disiplinli","Çözüm odaklı","Gelişime açık","İşbirliğine açık","Öğrenmeye açık","Maharetli",
-    "Yenilikçi","Net mesaj veren","Dinlemeyi bilen","İfade gücü yüksek","Kendini tanıyan","Eleştirel bakan","Düşünceli",
-    "Sorumluluk sahibi","Motive edici","Yardımsever","İlişki kurabilen","Meraklı","Tutkulu","İlgili",
-    "İkna edici","Uyumlu","Hızlı öğrenen","Kapsayıcı","Nazik","Özenli","Enerjik",
-    "Sabırlı","Esnek","Özgüvenli","Müşteri odaklı","Dengeli","Adaptif","Dışa dönük",
-    "Sabırsız","İnatçı","İçe dönük","Kötümser","Eleştiriye kapalı","Kontrolcü","Asabi",
-    "Kararsız","Kırılgan","Detaycı","Sert üsluplu","Çabuk demotive olan","Kibirli","Kontrol delisi",
-    "Aceleci","Soğuk","Gergin","Pasif","Dinlemeyen","Aşırı eleştirel","Katı"];
+  <script>
+    const traits = [
+      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
+      "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
+      "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
+      "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
+      "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
+      "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
+      "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
+      "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
+      "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
+      "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
+      "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
+      "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
+    ];
 
-  const grid = document.getElementById("traitsGrid");
-  const result = document.getElementById("result");
+    const grid = document.getElementById("traitsGrid");
+    const result = document.getElementById("result");
+    const nameSelect = document.getElementById("nameSelect");
 
-  traits.forEach(trait => {
-    const div = document.createElement("div");
-    div.className = "trait";
-    div.innerText = trait;
-    div.onclick = () => {
-      div.classList.toggle("selected");
-      const selected = document.querySelectorAll(".trait.selected");
-      if (selected.length > 6) {
-        div.classList.remove("selected");
-        alert("En fazla 6 özellik seçebilirsiniz.");
-      }
-    };
-    grid.appendChild(div);
-  });
+    // Dropdown'a Google Sheet üzerinden isimleri yükle
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/sheet?group_by=name")
+      .then(res => res.json())
+      .then(data => {
+        const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
+        nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join('');
+      });
 
-  document.getElementById("submitBtn").onclick = () => {
-    const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
-    const name = document.getElementById("nameInput").value.trim();
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-
-    if (!name) {
-      alert("Lütfen bir isim girin.");
-      return;
-    }
-    if (selected.length < 5) {
-      alert("Lütfen en az 5 özellik seçin.");
-      return;
-    }
-
-    let headerText = mode === "self" ? `${name} (Kendi değerlendirmesi)` : `${name} için seçilen özellikler`;
-    result.innerHTML = `<h3><strong>${headerText}</strong></h3><ul>${selected.map(s => `<li>${s}</li>`).join('')}</ul>`;
-
-    const now = new Date().toISOString();
-    const data = {
-      data: [{
-        isim: name,
-        mod: mode,
-        ozellikler: selected.join(", "),
-        tarih: now
-      }]
-    };
-
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    }).then(res => {
-      if (res.ok) {
-        console.log("Veri başarıyla gönderildi!");
-      } else {
-        alert("Veri gönderilemedi. Lütfen internet bağlantınızı kontrol edin.");
-      }
+    traits.forEach(trait => {
+      const div = document.createElement("div");
+      div.className = "trait";
+      div.innerText = trait;
+      div.onclick = () => {
+        div.classList.toggle("selected");
+        const selected = document.querySelectorAll(".trait.selected");
+        if (selected.length > 6) {
+          div.classList.remove("selected");
+          alert("En fazla 6 özellik seçebilirsiniz.");
+        }
+      };
+      grid.appendChild(div);
     });
-  };
-</script>
+
+    document.getElementById("submitBtn").onclick = () => {
+      const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
+      const name = nameSelect.value.trim();
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      if (!name) {
+        alert("Lütfen bir isim seçin.");
+        return;
+      }
+      if (selected.length < 5) {
+        alert("Lütfen en az 5 özellik seçin.");
+        return;
+      }
+
+      const data = {
+        data: {
+          name,
+          mode,
+          selected: selected.join(", "),
+          tarih: new Date().toLocaleString("tr-TR")
+        }
+      };
+
+      fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Gönderim hatası");
+        result.innerHTML = `<p style="color:green"><strong>Veri başarıyla kaydedildi. Teşekkürler!</strong></p>`;
+        document.querySelectorAll(".trait.selected").forEach(div => div.classList.remove("selected"));
+      })
+      .catch(() => {
+        result.innerHTML = `<p style="color:red"><strong>Bir hata oluştu, lütfen tekrar deneyin.</strong></p>`;
+      });
+    };
+  </script>
 </body>
 </html>
