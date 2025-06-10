@@ -33,6 +33,9 @@
     .quadrant h3 {
       margin-top: 0;
     }
+    .trait {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -43,19 +46,19 @@
 
   <div class="grid-2x2">
     <div class="quadrant">
-      <h3>Açık Alan (Ben Biliyorum-Başkaları Biliyor)</h3>
+      <h3>Açık Alan (Herkes biliyor)</h3>
       <div id="openArea"></div>
     </div>
     <div class="quadrant">
-      <h3>Kör Alan (Ben Bilmiyorum-Başkaları Biliyor)</h3>
+      <h3>Kör Alan (Başkaları biliyor)</h3>
       <div id="blindArea"></div>
     </div>
     <div class="quadrant">
-      <h3>Gizli Alan (Ben Biliyorum-Başkaları Bilmiyor)</h3>
+      <h3>Gizli Alan (Kendisi biliyor)</h3>
       <div id="hiddenArea"></div>
     </div>
     <div class="quadrant">
-      <h3>Bilinmeyen Alan (Ben Bilmiyorum-Başkaları Bilmiyor)</h3>
+      <h3>Bilinmeyen Alan (Kimse bilmiyor)</h3>
       <div id="unknownArea"></div>
     </div>
   </div>
@@ -63,7 +66,7 @@
   <script>
     const nameSelect = document.getElementById("nameSelect");
 
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3?sheet=isimler")
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/isimler")
       .then(res => res.json())
       .then(data => {
         const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
@@ -98,27 +101,22 @@
 
           const open = [];
           const blind = [];
-          const hidden = [];
-          const unknown = [];
 
           allTraits.forEach(trait => {
             const selfVal = selfCounts[trait] || 0;
             const otherVal = otherCounts[trait] || 0;
-            const selfPercent = selfEntries.length ? Math.round((selfVal / selfEntries.length) * 100) : 0;
             const otherPercent = otherEntries.length ? Math.round((otherVal / otherEntries.length) * 100) : 0;
 
-            const label = `${trait} (Kendisi: %${selfPercent}, Başkaları: %${otherPercent})`;
+            const label = `<span class='trait'>${trait}</span> (%${otherPercent})`;
 
             if (selfVal > 0 && otherVal > 0) open.push(label);
             else if (selfVal === 0 && otherVal > 0) blind.push(label);
-            else if (selfVal > 0 && otherVal === 0) hidden.push(label);
-            else unknown.push(label);
           });
 
           document.getElementById("openArea").innerHTML = open.join("<br>");
           document.getElementById("blindArea").innerHTML = blind.join("<br>");
-          document.getElementById("hiddenArea").innerHTML = hidden.join("<br>");
-          document.getElementById("unknownArea").innerHTML = unknown.join("<br>");
+          document.getElementById("hiddenArea").innerHTML = "";
+          document.getElementById("unknownArea").innerHTML = "";
         });
     };
   </script>
