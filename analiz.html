@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Johari Analiz</title>
   <style>
     body {
@@ -12,121 +12,115 @@
     }
     h2 {
       text-align: center;
-      margin-bottom: 10px;
     }
     .selector-group {
       text-align: center;
       margin-bottom: 20px;
     }
-    select {
-      padding: 8px;
-      width: 220px;
-      margin-top: 8px;
-    }
-    .johari-grid {
+    .grid-2x2 {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, auto);
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       gap: 20px;
       margin-top: 30px;
     }
-    .johari-box {
-      background-color: #fff;
+    .quadrant {
+      background: white;
       padding: 15px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    .johari-box h3 {
+    .quadrant h3 {
       margin-top: 0;
-      font-size: 16px;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 5px;
-    }
-    ul {
-      list-style-type: none;
-      padding-left: 0;
     }
   </style>
 </head>
 <body>
-  <h2>Johari Analiz</h2>
-  <p style="text-align:center;">Johari penceresini görmek istediğiniz ismi seçin</p>
   <div class="selector-group">
-    <select id="nameSelect">
-      <option value="">İsim seçin</option>
-    </select>
+    <label for="nameSelect">Johari penceresini görmek istediğiniz ismi seçin</label><br />
+    <select id="nameSelect" style="padding: 8px; margin-top: 8px; width: 220px;"></select>
   </div>
-  <div id="johariWindow" class="johari-grid" style="display:none">
-    <div class="johari-box">
+
+  <div class="grid-2x2">
+    <div class="quadrant">
       <h3>Açık Alan (Herkes biliyor)</h3>
-      <ul id="acikAlan"></ul>
+      <div id="openArea"></div>
     </div>
-    <div class="johari-box">
+    <div class="quadrant">
       <h3>Kör Alan (Başkaları biliyor)</h3>
-      <ul id="korAlan"></ul>
+      <div id="blindArea"></div>
     </div>
-    <div class="johari-box">
+    <div class="quadrant">
       <h3>Gizli Alan (Kendisi biliyor)</h3>
-      <ul id="gizliAlan"></ul>
+      <div id="hiddenArea"></div>
     </div>
-    <div class="johari-box">
+    <div class="quadrant">
       <h3>Bilinmeyen Alan (Kimse bilmiyor)</h3>
-      <ul id="bilinmeyenAlan"></ul>
+      <div id="unknownArea"></div>
     </div>
   </div>
 
   <script>
     const nameSelect = document.getElementById("nameSelect");
-    const johariWindow = document.getElementById("johariWindow");
 
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3?sheet=isimler")
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/sheet2")
       .then(res => res.json())
       .then(data => {
         const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
-        nameSelect.innerHTML += names.map(name => `<option value="${name}">${name}</option>`).join('');
+        nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join("");
       });
 
     nameSelect.onchange = () => {
-      const selectedName = nameSelect.value.trim();
-      if (!selectedName) return;
+      const name = nameSelect.value;
+      if (!name) return;
 
       fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3")
         .then(res => res.json())
         .then(data => {
-          const selfEntries = data.filter(entry => entry.name.toLowerCase() === selectedName.toLowerCase() && entry.mode === "self");
-          const otherEntries = data.filter(entry => entry.name.toLowerCase() === selectedName.toLowerCase() && entry.mode === "other");
+          const normalized = name.toLowerCase().trim();
+          const selfEntries = data.filter(entry => entry.name.toLowerCase().trim() === normalized && entry.mode === "self");
+          const otherEntries = data.filter(entry => entry.name.toLowerCase().trim() === normalized && entry.mode === "other");
 
-          const selfTraits = new Set(selfEntries.flatMap(e => e.selected.split(',').map(s => s.trim())));
-          const otherTraits = new Set(otherEntries.flatMap(e => e.selected.split(',').map(s => s.trim())));
+          const selfCounts = {};
+          const otherCounts = {};
 
-          const acikAlan = [...selfTraits].filter(x => otherTraits.has(x));
-          const korAlan = [...otherTraits].filter(x => !selfTraits.has(x));
-          const gizliAlan = [...selfTraits].filter(x => !otherTraits.has(x));
-          const bilinmeyenAlan = [...new Set([...traits])].filter(x => !selfTraits.has(x) && !otherTraits.has(x));
+          selfEntries.forEach(e => e.selected.split(",").forEach(t => {
+            const trait = t.trim();
+            selfCounts[trait] = (selfCounts[trait] || 0) + 1;
+          }));
 
-          document.getElementById("acikAlan").innerHTML = acikAlan.map(x => `<li>${x}</li>`).join('');
-          document.getElementById("korAlan").innerHTML = korAlan.map(x => `<li>${x}</li>`).join('');
-          document.getElementById("gizliAlan").innerHTML = gizliAlan.map(x => `<li>${x}</li>`).join('');
-          document.getElementById("bilinmeyenAlan").innerHTML = bilinmeyenAlan.map(x => `<li>${x}</li>`).join('');
+          otherEntries.forEach(e => e.selected.split(",").forEach(t => {
+            const trait = t.trim();
+            otherCounts[trait] = (otherCounts[trait] || 0) + 1;
+          }));
 
-          johariWindow.style.display = 'grid';
+          const allTraits = new Set([...Object.keys(selfCounts), ...Object.keys(otherCounts)]);
+
+          const open = [];
+          const blind = [];
+          const hidden = [];
+          const unknown = [];
+
+          allTraits.forEach(trait => {
+            const selfVal = selfCounts[trait] || 0;
+            const otherVal = otherCounts[trait] || 0;
+            const selfPercent = selfEntries.length ? Math.round((selfVal / selfEntries.length) * 100) : 0;
+            const otherPercent = otherEntries.length ? Math.round((otherVal / otherEntries.length) * 100) : 0;
+
+            const label = `${trait} (Kendisi: %${selfPercent}, Başkaları: %${otherPercent})`;
+
+            if (selfVal > 0 && otherVal > 0) open.push(label);
+            else if (selfVal === 0 && otherVal > 0) blind.push(label);
+            else if (selfVal > 0 && otherVal === 0) hidden.push(label);
+            else unknown.push(label);
+          });
+
+          document.getElementById("openArea").innerHTML = open.join("<br>");
+          document.getElementById("blindArea").innerHTML = blind.join("<br>");
+          document.getElementById("hiddenArea").innerHTML = hidden.join("<br>");
+          document.getElementById("unknownArea").innerHTML = unknown.join("<br>");
         });
     };
-
-    const traits = [
-      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
-      "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
-      "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
-      "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
-      "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
-      "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
-      "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
-      "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
-      "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
-      "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
-      "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
-      "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
-    ];
   </script>
 </body>
 </html>
