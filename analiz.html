@@ -3,107 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Johari Analiz</title>
+  <title>Johari Özellik Seçimi</title>
   <style>
     body {
       font-family: sans-serif;
-      background-color: #f4f4f4;
       padding: 20px;
-      max-width: 800px;
-      margin: auto;
+      background-color: #f4f4f4;
     }
-    h2, h3 {
+    h2 {
       text-align: center;
     }
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      font-size: 16px;
-    }
-    .section {
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
       margin-top: 20px;
     }
-    ul {
-      columns: 2;
-      padding-left: 20px;
+    .trait {
+      background-color: #fff;
+      border: 2px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .trait.selected {
+      border-color: #2a9d8f;
+      background-color: #e0f7f4;
+    }
+    #submitBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #result {
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .selector-group {
+      text-align: center;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>Johari Penceresi Analizi</h2>
-  <p>Kendi adınızı girerek Johari alanlarınızı keşfedin:</p>
-  <input type="text" id="nameInput" placeholder="Adınızı yazın">
-  <button onclick="analyzeJohari()">Analizi Göster</button>
-  <div id="results"></div>
+  <div class="selector-group">
+    <label for="nameSelect">Kimi değerlendiriyorsunuz?</label><br>
+    <select id="nameSelect" style="padding: 8px; margin-top: 8px; width: 220px;"></select><br><br>
+
+    <label><input type="radio" name="mode" value="self" checked> Kendim için</label>
+    <label style="margin-left: 20px;"><input type="radio" name="mode" value="other"> Başkası için</label>
+  </div>
+
+  <h2>Johari Penceresi: Özellik Seçimi</h2>
+  <p>Lütfen değerlendirdiğiniz kişiyi en iyi tanımlayan 5-6 özelliği seçin.</p>
+  <div class="grid" id="traitsGrid"></div>
+  <button id="submitBtn">Gönder</button>
+  <div id="result"></div>
 
   <script>
     const traits = [
-      "Güvenilir","Destekleyici","Planlı","Adil","Sonuç odaklı","Sistemli","Mutlu",
-      "İnisiyatif alan","Analitik","Sakin","Vizyoner","Proaktif","İlham verici","Mantıklı",
-      "Empatik","Pratik","İyimser","Cesur","Çatışma çözen","Yardım eden","İdealist",
-      "Kararlı","Organize","Saygılı","Yapıcı","Yol gösterici","Çok yönlü","Sevecen",
-      "Takım oyuncusu","Disiplinli","Çözüm odaklı","Gelişime açık","İşbirliğine açık","Öğrenmeye açık","Maharetli",
-      "Yenilikçi","Net mesaj veren","Dinlemeyi bilen","İfade gücü yüksek","Kendini tanıyan","Eleştirel bakan","Düşünceli",
-      "Sorumluluk sahibi","Motive edici","Yardımsever","İlişki kurabilen","Meraklı","Tutkulu","İlgili",
-      "İkna edici","Uyumlu","Hızlı öğrenen","Kapsayıcı","Nazik","Özenli","Enerjik",
-      "Sabırlı","Esnek","Özgüvenli","Müşteri odaklı","Dengeli","Adaptif","Dışa dönük",
-      "Sabırsız","İnatçı","İçe dönük","Kötümser","Eleştiriye kapalı","Kontrolcü","Asabi",
-      "Kararsız","Kırılgan","Detaycı","Sert üsluplu","Çabuk demotive olan","Kibirli","Kontrol delisi",
-      "Aceleci","Soğuk","Gergin","Pasif","Dinlemeyen","Aşırı eleştirel","Katı"
+      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
+      "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
+      "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
+      "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
+      "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
+      "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
+      "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
+      "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
+      "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
+      "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
+      "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
+      "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
     ];
 
-    async function analyzeJohari() {
-      const name = document.getElementById("nameInput").value.trim();
-      if (!name) return alert("Lütfen adınızı girin.");
+    const grid = document.getElementById("traitsGrid");
+    const result = document.getElementById("result");
+    const nameSelect = document.getElementById("nameSelect");
 
-      const res = await fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3");
-      const data = await res.json();
-
-      const selfTraits = data.filter(row => row.name.toLowerCase() === name.toLowerCase() && row.mode === "self")
-                             .flatMap(r => r.selected.split(", "));
-
-      const otherTraitsRaw = data.filter(row => row.name.toLowerCase() === name.toLowerCase() && row.mode === "other");
-
-      const otherCount = {};
-      otherTraitsRaw.forEach(row => {
-        row.selected.split(", ").forEach(trait => {
-          otherCount[trait] = (otherCount[trait] || 0) + 1;
-        });
+    // Dropdown'a Google Sheet üzerinden isimleri yükle
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/sheet?group_by=name")
+      .then(res => res.json())
+      .then(data => {
+        const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
+        nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join('');
       });
 
-      const totalOther = otherTraitsRaw.length;
-
-      const openArea = [];
-      const blindArea = [];
-      const hiddenArea = [];
-      const unknownArea = [];
-
-      traits.forEach(trait => {
-        const inSelf = selfTraits.includes(trait);
-        const inOther = otherCount[trait];
-
-        if (inSelf && inOther) {
-          openArea.push(`${trait} (%${Math.round((inOther / totalOther) * 100)})`);
-        } else if (!inSelf && inOther) {
-          blindArea.push(`${trait} (%${Math.round((inOther / totalOther) * 100)})`);
-        } else if (inSelf && !inOther) {
-          hiddenArea.push(trait);
-        } else {
-          unknownArea.push(trait);
+    traits.forEach(trait => {
+      const div = document.createElement("div");
+      div.className = "trait";
+      div.innerText = trait;
+      div.onclick = () => {
+        div.classList.toggle("selected");
+        const selected = document.querySelectorAll(".trait.selected");
+        if (selected.length > 6) {
+          div.classList.remove("selected");
+          alert("En fazla 6 özellik seçebilirsiniz.");
         }
-      });
+      };
+      grid.appendChild(div);
+    });
 
-      document.getElementById("results").innerHTML = `
-        <div class="section"><h3>🔓 Açık Alan</h3><ul>${openArea.map(t => `<li>${t}</li>`).join('')}</ul></div>
-        <div class="section"><h3>👁️ Kör Alan</h3><ul>${blindArea.map(t => `<li>${t}</li>`).join('')}</ul></div>
-        <div class="section"><h3>🔒 Gizli Alan</h3><ul>${hiddenArea.map(t => `<li>${t}</li>`).join('')}</ul></div>
-        <div class="section"><h3>❔ Bilinmeyen Alan</h3><ul>${unknownArea.map(t => `<li>${t}</li>`).join('')}</ul></div>
-      `;
-    }
+    document.getElementById("submitBtn").onclick = () => {
+      const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
+      const name = nameSelect.value.trim();
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      if (!name) {
+        alert("Lütfen bir isim seçin.");
+        return;
+      }
+      if (selected.length < 5) {
+        alert("Lütfen en az 5 özellik seçin.");
+        return;
+      }
+
+      const data = {
+        data: {
+          name,
+          mode,
+          selected: selected.join(", "),
+          tarih: new Date().toLocaleString("tr-TR")
+        }
+      };
+
+      fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Gönderim hatası");
+        result.innerHTML = `<p style="color:green"><strong>Veri başarıyla kaydedildi. Teşekkürler!</strong></p>`;
+        document.querySelectorAll(".trait.selected").forEach(div => div.classList.remove("selected"));
+      })
+      .catch(() => {
+        result.innerHTML = `<p style="color:red"><strong>Bir hata oluştu, lütfen tekrar deneyin.</strong></p>`;
+      });
+    };
   </script>
 </body>
 </html>
