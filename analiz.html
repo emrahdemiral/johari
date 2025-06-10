@@ -13,111 +13,101 @@
     h2 {
       text-align: center;
     }
-    .selector-group {
-      text-align: center;
-      margin-bottom: 20px;
-    }
     #nameSelect {
+      display: block;
+      margin: 0 auto 20px auto;
       padding: 8px;
-      margin-top: 8px;
       width: 220px;
     }
-    #result {
-      margin-top: 30px;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
+    .grid-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
     .box {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
+      border: 1px solid #aaa;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 8px;
     }
     .box h3 {
-      margin: 0 0 10px;
+      margin-top: 0;
+      text-align: center;
+    }
+    ul {
+      padding-left: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="selector-group">
-    <h2>Johari Analiz</h2>
-    <p>Johari penceresini görmek istediğiniz ismi seçin</p>
-    <select id="nameSelect">
-      <option value="">İsim seçin</option>
-    </select>
-  </div>
+  <h2>Johari Penceresi Analizi</h2>
+  <p style="text-align: center;">Johari penceresini görmek istediğiniz ismi seçin</p>
+  <select id="nameSelect">
+    <option value="">İsim seçin</option>
+  </select>
 
-  <div id="result"></div>
+  <div id="analysis" class="grid-2x2" style="margin-top: 20px;"></div>
 
   <script>
-    const result = document.getElementById("result");
     const nameSelect = document.getElementById("nameSelect");
+    const analysisDiv = document.getElementById("analysis");
 
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3?sheet=isimler")
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/sheet?sheet=isimler")
       .then(res => res.json())
       .then(data => {
         const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
-        nameSelect.innerHTML += names.map(name => `<option value="${name}">${name}</option>`).join('');
+        nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join('');
       });
 
-    nameSelect.onchange = () => {
-      const selectedName = nameSelect.value;
+    nameSelect.addEventListener("change", () => {
+      const selectedName = nameSelect.value.trim().toLowerCase();
       if (!selectedName) return;
 
       fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3")
         .then(res => res.json())
         .then(data => {
-          const selfEntries = data.filter(entry => entry.name.toLowerCase() === selectedName.toLowerCase() && entry.mode === "self");
-          const otherEntries = data.filter(entry => entry.name.toLowerCase() === selectedName.toLowerCase() && entry.mode === "other");
+          const selfEntry = data.find(row => row.name?.toLowerCase() === selectedName && row.mode === "self");
+          const otherEntries = data.filter(row => row.name?.toLowerCase() === selectedName && row.mode === "other");
 
-          const selfTraits = new Set();
-          selfEntries.forEach(entry => entry.selected.split(",").forEach(trait => selfTraits.add(trait.trim())));
+          const selfTraits = selfEntry?.selected?.split(",").map(s => s.trim()) || [];
+          const otherTraits = otherEntries.flatMap(row => row.selected.split(",").map(s => s.trim()));
+          const uniqueOtherTraits = [...new Set(otherTraits)];
 
-          const otherTraitCounts = {};
-          otherEntries.forEach(entry => {
-            entry.selected.split(",").forEach(trait => {
-              const t = trait.trim();
-              if (!otherTraitCounts[t]) otherTraitCounts[t] = 0;
-              otherTraitCounts[t]++;
-            });
-          });
+          const openArea = selfTraits.filter(trait => uniqueOtherTraits.includes(trait));
+          const blindSpot = uniqueOtherTraits.filter(trait => !selfTraits.includes(trait));
+          const hiddenArea = selfTraits.filter(trait => !uniqueOtherTraits.includes(trait));
+          const allTraits = [
+            ...new Set([...selfTraits, ...uniqueOtherTraits])
+          ];
+          const fullList = [
+            "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
+            "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
+            "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
+            "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
+            "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
+            "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
+            "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
+            "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
+            "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
+            "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
+            "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
+            "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
+          ];
+          const unknown = fullList.filter(trait => !allTraits.includes(trait));
 
-          const totalOther = otherEntries.length;
-          const otherTraits = Object.keys(otherTraitCounts);
-
-          const ortak = [...selfTraits].filter(trait => otherTraits.includes(trait));
-          const sadeceBen = [...selfTraits].filter(trait => !otherTraits.includes(trait));
-          const sadeceBaskasi = otherTraits.filter(trait => !selfTraits.has(trait));
-
-          function formatList(list, isOther = false) {
-            return list.map(trait => {
-              const count = otherTraitCounts[trait] || 0;
-              const percent = totalOther > 0 ? Math.round((count / totalOther) * 100) : 0;
-              return isOther ? `${trait} (%${percent})` : trait;
-            }).join(", ");
-          }
-
-          result.innerHTML = `
+          const boxTemplate = (title, items) => `
             <div class="box">
-              <h3>🟩 Açık Alan (Ortak Seçimler)</h3>
-              <p>${formatList(ortak, true) || "Yok"}</p>
-            </div>
-            <div class="box">
-              <h3>🟨 Gizli Alan (Sadece Kendisi Seçmiş)</h3>
-              <p>${formatList(sadeceBen) || "Yok"}</p>
-            </div>
-            <div class="box">
-              <h3>🟥 Kör Alan (Sadece Başkaları Seçmiş)</h3>
-              <p>${formatList(sadeceBaskasi, true) || "Yok"}</p>
-            </div>
-            <div class="box">
-              <h3>⬜ Bilinmeyen Alan</h3>
-              <p>Hiç seçilmeyen özellikler burada listelenmez.</p>
-            </div>
-          `;
+              <h3>${title}</h3>
+              <ul>${items.map(trait => `<li>${trait}</li>`).join('')}</ul>
+            </div>`;
+
+          analysisDiv.innerHTML =
+            boxTemplate("Açık Alan", openArea) +
+            boxTemplate("Kör Alan", blindSpot) +
+            boxTemplate("Gizli Alan", hiddenArea) +
+            boxTemplate("Bilinmeyen Alan", unknown);
         });
-    };
+    });
   </script>
 </body>
 </html>
