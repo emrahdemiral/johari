@@ -85,7 +85,7 @@
     const nameSelect = document.getElementById("nameSelect");
 
     // Dropdown'a Google Sheet üzerinden isimleri yükle
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/sheet?group_by=name")
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3?sheet=isimler")
       .then(res => res.json())
       .then(data => {
         const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
