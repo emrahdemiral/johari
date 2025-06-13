@@ -3,99 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Johari Özellik Seçimi</title>
+  <title>Johari Penceresi: Özellik Seçimi</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
       background-color: #f4f4f4;
+      margin: 0;
     }
     h2 {
       text-align: center;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .trait {
-      background-color: #fff;
-      border: 2px solid #ccc;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-    }
-    .trait.selected {
-      border-color: #2a9d8f;
-      background-color: #e0f7f4;
-    }
-    #submitBtn {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-    #result {
-      margin-top: 20px;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 8px;
     }
     .selector-group {
       text-align: center;
       margin-bottom: 20px;
     }
+    #nameInput, #nameSelect {
+      padding: 12px;
+      font-size: 18px;
+      width: 90%;
+      max-width: 300px;
+      margin-top: 8px;
+    }
+    .mode-group {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .trait {
+      background: white;
+      border: 2px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .trait.selected {
+      background-color: #cde;
+      border-color: #69c;
+    }
+    #submitBtn {
+      display: block;
+      margin: 0 auto;
+      padding: 12px 20px;
+      font-size: 18px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 30px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+  <div class="mode-group">
+    <label><input type="radio" name="mode" value="self" checked> Kendim için</label>
+    <label><input type="radio" name="mode" value="other"> Başkası için</label>
+  </div>
   <div class="selector-group">
     <label for="nameSelect">Kimi değerlendiriyorsunuz?</label><br>
-    <select id="nameSelect" style="padding: 8px; margin-top: 8px; width: 220px;"></select><br><br>
-
-    <label><input type="radio" name="mode" value="self" checked> Kendim için</label>
-    <label style="margin-left: 20px;"><input type="radio" name="mode" value="other"> Başkası için</label>
+    <select id="nameSelect"></select>
   </div>
 
   <h2>Johari Penceresi: Özellik Seçimi</h2>
-  <p>Lütfen değerlendirdiğiniz kişiyi size göre en iyi tanımlayan 6 özelliği seçin. Bu özelliklerden bir tanesi olumsuz olsun.</p>
-  <div class="grid" id="traitsGrid"></div>
+  <p style="text-align:center;">Lütfen değerlendirdiğiniz kişiyi size göre en iyi tanımlayan 6 özelliği seçin. Bu özelliklerden bir tanesi olumsuz olsun.</p>
+
+  <div class="grid" id="traitGrid"></div>
   <button id="submitBtn">Gönder</button>
   <div id="result"></div>
 
   <script>
-    const traits = [
-      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu",
-      "İnisiyatif alan", "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı",
-      "Empatik", "Pratik", "İyimser", "Cesur", "Çatışma çözen", "Yardım eden", "İdealist",
-      "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici", "Çok yönlü", "Sevecen",
-      "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık", "Öğrenmeye açık", "Maharetli",
-      "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek", "Kendini tanıyan", "Eleştirel bakan", "Düşünceli",
-      "Sorumluluk sahibi", "Motive edici", "Yardımsever", "İlişki kurabilen", "Meraklı", "Tutkulu", "İlgili",
-      "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli", "Enerjik",
-      "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük",
-      "Sabırsız", "İnatçı", "İçe dönük", "Kötümser", "Eleştiriye kapalı", "Kontrolcü", "Asabi",
-      "Kararsız", "Kırılgan", "Detaycı", "Sert üsluplu", "Çabuk demotive olan", "Kibirli", "Kontrol delisi",
-      "Aceleci", "Soğuk", "Gergin", "Pasif", "Dinlemeyen", "Aşırı eleştirel", "Katı"
-    ];
-
-    const grid = document.getElementById("traitsGrid");
+    const traitGrid = document.getElementById("traitGrid");
     const result = document.getElementById("result");
+    const submitBtn = document.getElementById("submitBtn");
     const nameSelect = document.getElementById("nameSelect");
 
-    // Dropdown'a Google Sheet üzerinden isimleri yükle
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3?sheet=isimler")
-      .then(res => res.json())
-      .then(data => {
-        const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
-        nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join('');
-      });
+    const traits = [
+      "Güvenilir", "Destekleyici", "Planlı", "Adil", "Sonuç odaklı", "Sistemli", "Mutlu", "İnisiyatif alan",
+      "Analitik", "Sakin", "Vizyoner", "Proaktif", "İlham verici", "Mantıklı", "Empatik", "Pratik", "İyimser", "Cesur",
+      "Çatışma çözen", "Yardım eden", "İdealist", "Kararlı", "Organize", "Saygılı", "Yapıcı", "Yol gösterici",
+      "Çok yönlü", "Sevecen", "Takım oyuncusu", "Disiplinli", "Çözüm odaklı", "Gelişime açık", "İşbirliğine açık",
+      "Öğrenmeye açık", "Maharetli", "Yenilikçi", "Net mesaj veren", "Dinlemeyi bilen", "İfade gücü yüksek",
+      "Kendini tanıyan", "Eleştirel bakan", "Düşünceli", "Sorumluluk sahibi", "Motive edici", "Yardımsever",
+      "İlişki kurabilen", "Meraklı", "İkna edici", "Uyumlu", "Hızlı öğrenen", "Kapsayıcı", "Nazik", "Özenli",
+      "Enerjik", "Sabırlı", "Esnek", "Özgüvenli", "Müşteri odaklı", "Dengeli", "Adaptif", "Dışa dönük"
+    ];
 
     traits.forEach(trait => {
       const div = document.createElement("div");
       div.className = "trait";
-      div.innerText = trait;
+      div.textContent = trait;
       div.onclick = () => {
         div.classList.toggle("selected");
         const selected = document.querySelectorAll(".trait.selected");
@@ -104,44 +111,41 @@
           alert("En fazla 6 özellik seçebilirsiniz.");
         }
       };
-      grid.appendChild(div);
+      traitGrid.appendChild(div);
     });
 
-    document.getElementById("submitBtn").onclick = () => {
-      const selected = [...document.querySelectorAll(".trait.selected")].map(el => el.innerText);
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3")
+      .then(res => res.json())
+      .then(data => {
+        const possibleKeys = ["name", "isim", "ad", "Ad Soyad"];
+        const firstEntry = data[0] || {};
+        const key = possibleKeys.find(k => k in firstEntry);
+
+        if (key) {
+          const names = [...new Set(data.map(entry => entry[key]).filter(n => n))];
+          nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join("");
+        } else {
+          nameSelect.innerHTML = '<option value="">İsim verisi bulunamadı</option>';
+        }
+      });
+
+    submitBtn.onclick = () => {
       const name = nameSelect.value.trim();
       const mode = document.querySelector('input[name="mode"]:checked').value;
-
-      if (!name) {
-        alert("Lütfen bir isim seçin.");
+      const selected = [...document.querySelectorAll(".trait.selected")].map(t => t.textContent);
+      if (!name || selected.length < 6) {
+        alert("Lütfen bir isim seçin ve 6 özellik belirtin.");
         return;
       }
-      if (selected.length < 5) {
-        alert("Lütfen 6 özellik seçin.");
-        return;
-      }
-
-      const data = {
-        data: {
-          name,
-          mode,
-          selected: selected.join(", "),
-          tarih: new Date().toLocaleString("tr-TR")
-        }
-      };
 
       fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3", {
         method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: [{ name, mode, selected: selected.join(", "), tarih: new Date().toISOString() }] })
       })
-      .then(response => {
-        if (!response.ok) throw new Error("Gönderim hatası");
-        result.innerHTML = `<p style="color:green"><strong>Veri başarıyla kaydedildi. Teşekkürler!</strong></p>`;
-        document.querySelectorAll(".trait.selected").forEach(div => div.classList.remove("selected"));
-      })
-      .catch(() => {
-        result.innerHTML = `<p style="color:red"><strong>Bir hata oluştu, lütfen tekrar deneyin.</strong></p>`;
+      .then(res => res.json())
+      .then(() => {
+        result.innerHTML = "<p>Teşekkürler! Değerlendirmeniz kaydedildi.</p>";
       });
     };
   </script>
