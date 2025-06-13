@@ -17,6 +17,13 @@
       text-align: center;
       margin-bottom: 20px;
     }
+    #nameSelect {
+      padding: 12px;
+      font-size: 18px;
+      width: 90%;
+      max-width: 300px;
+      margin-top: 8px;
+    }
     .grid-2x2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -41,7 +48,7 @@
 <body>
   <div class="selector-group">
     <label for="nameSelect">Johari penceresini görmek istediğiniz ismi seçin</label><br />
-    <select id="nameSelect" style="padding: 8px; margin-top: 8px; width: 220px;"></select>
+    <select id="nameSelect"></select>
   </div>
 
   <div class="grid-2x2">
@@ -66,7 +73,7 @@
   <script>
     const nameSelect = document.getElementById("nameSelect");
 
-    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3")
+    fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/isimler")
       .then(res => res.json())
       .then(data => {
         const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
@@ -106,7 +113,8 @@
             const selfVal = selfCounts[trait] || 0;
             const otherVal = otherCounts[trait] || 0;
             const otherPercent = otherEntries.length ? Math.round((otherVal / otherEntries.length) * 100) : 0;
-            const label = `<span class='trait'>${trait} (%${otherPercent})</span>`;
+
+            const label = `<span class='trait'>${trait}</span> (%${otherPercent})`;
 
             if (selfVal > 0 && otherVal > 0) open.push(label);
             else if (selfVal === 0 && otherVal > 0) blind.push(label);
