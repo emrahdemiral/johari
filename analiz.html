@@ -76,8 +76,16 @@
     fetch("https://sheetdb.io/api/v1/ygs2xvq4fqvi3/isimler")
       .then(res => res.json())
       .then(data => {
-        const names = [...new Set(data.map(entry => entry.name).filter(n => n))];
-        nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join("");
+        const possibleKeys = ["name", "isim", "ad", "Ad Soyad"];
+        const firstEntry = data[0] || {};
+        const key = possibleKeys.find(k => k in firstEntry);
+
+        if (key) {
+          const names = [...new Set(data.map(entry => entry[key]).filter(n => n))];
+          nameSelect.innerHTML = '<option value="">İsim seçin</option>' + names.map(name => `<option value="${name}">${name}</option>`).join("");
+        } else {
+          nameSelect.innerHTML = '<option value="">İsim verisi bulunamadı</option>';
+        }
       });
 
     nameSelect.onchange = () => {
@@ -88,8 +96,8 @@
         .then(res => res.json())
         .then(data => {
           const normalized = name.toLowerCase().trim();
-          const selfEntries = data.filter(entry => entry.name.toLowerCase().trim() === normalized && entry.mode === "self");
-          const otherEntries = data.filter(entry => entry.name.toLowerCase().trim() === normalized && entry.mode === "other");
+          const selfEntries = data.filter(entry => entry.name?.toLowerCase().trim() === normalized && entry.mode === "self");
+          const otherEntries = data.filter(entry => entry.name?.toLowerCase().trim() === normalized && entry.mode === "other");
 
           const selfCounts = {};
           const otherCounts = {};
@@ -113,7 +121,6 @@
             const selfVal = selfCounts[trait] || 0;
             const otherVal = otherCounts[trait] || 0;
             const otherPercent = otherEntries.length ? Math.round((otherVal / otherEntries.length) * 100) : 0;
-
             const label = `<span class='trait'>${trait}</span> (%${otherPercent})`;
 
             if (selfVal > 0 && otherVal > 0) open.push(label);
